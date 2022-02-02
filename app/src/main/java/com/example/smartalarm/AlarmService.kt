@@ -1,15 +1,18 @@
 package com.example.smartalarm
 
 import android.app.AlarmManager
+import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import android.util.Log
+import android.media.RingtoneManager
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import java.util.*
 
-//Creating Service For Notivication
-class AlarmService {
+//Creating Service For Notification
+class AlarmService : BroadcastReceiver() {
     fun setOneTimeAlarm(context: Context, type: Int, date: String, time: String, message: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         //Put Data Intent
@@ -17,7 +20,7 @@ class AlarmService {
         intent.putExtra("message", message)
         intent.putExtra("type", type)
 
-        //Convertig
+        //Converting
         val dateArray = date.split("-").toTypedArray()
         val timeArray = time.split(":").toTypedArray()
 
@@ -33,6 +36,34 @@ class AlarmService {
         //Pending Intent
         val pendingIntent = PendingIntent.getBroadcast(context, 101, intent, 0)
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-        Toast.makeText(context, "Success seet OnetimAlarm", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Success set OnetimeAlarm", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onReceive(context: Context?, intent: Intent?) {
+        val message = intent?.getStringExtra("message")
+        intent?.getIntExtra("type", 0)
+
+        if (context != null && message != null) {
+            showNotificationAlarm(context, "Bangun Oii", message, 101)
+        }
+    }
+
+    private fun showNotificationAlarm(
+        context: Context,
+        title: String,
+        message: String,
+        notificationId: Int
+    ) {
+        val ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+
+        val notificationManage =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val builder = NotificationCompat.Builder(context, "Alarm_1")
+            .setSmallIcon(R.drawable.ic_one_time)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setSound(ringtone)
+            .build()
+        notificationManage.notify(notificationId, builder)
     }
 }

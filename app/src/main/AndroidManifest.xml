@@ -9,6 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SmartAlarm">
+        <receiver
+            android:name=".AlarmService"
+            android:enabled="true" />
+
         <activity
             android:name=".RepeatingAlarmActivity"
             android:exported="true" />
