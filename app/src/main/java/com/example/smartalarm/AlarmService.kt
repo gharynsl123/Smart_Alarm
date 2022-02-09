@@ -1,12 +1,14 @@
 package com.example.smartalarm
 
 import android.app.AlarmManager
+import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
+import android.os.Build
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import java.util.*
@@ -27,7 +29,7 @@ class AlarmService : BroadcastReceiver() {
         val calendar = Calendar.getInstance()
         //Date
         calendar.set(Calendar.YEAR, Integer.parseInt(dateArray[0]))
-        calendar.set(Calendar.MONTH, Integer.parseInt(dateArray[1]))
+        calendar.set(Calendar.MONTH, Integer.parseInt(dateArray[1])-1)
         calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateArray[2]))
         //Time
         calendar.set(Calendar.HOUR, Integer.parseInt(timeArray[0]))
@@ -44,7 +46,7 @@ class AlarmService : BroadcastReceiver() {
         intent?.getIntExtra("type", 0)
 
         if (context != null && message != null) {
-            showNotificationAlarm(context, "Bangun Oii", message, 101)
+            showNotificationAlarm(context, "Oii", message, 101)
         }
     }
 
@@ -54,6 +56,7 @@ class AlarmService : BroadcastReceiver() {
         message: String,
         notificationId: Int
     ) {
+        val channelName = "SmartAlarm"
         val ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 
         val notificationManage =
@@ -63,7 +66,15 @@ class AlarmService : BroadcastReceiver() {
             .setContentTitle(title)
             .setContentText(message)
             .setSound(ringtone)
-            .build()
-        notificationManage.notify(notificationId, builder)
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val channel = NotificationChannel("alarm_1", channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            channel.enableVibration(true)
+            channel.vibrationPattern = longArrayOf(1000, 1000, 1000, 1000, 1000)
+            notificationManage.createNotificationChannel(channel)
+        }
+        val notif = builder.build()
+        notificationManage.notify(notificationId, notif)
     }
 }
