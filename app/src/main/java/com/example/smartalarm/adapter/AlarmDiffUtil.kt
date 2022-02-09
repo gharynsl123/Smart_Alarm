@@ -4,8 +4,8 @@ import androidx.recyclerview.widget.DiffUtil
 import com.example.smartalarm.data.Alarm
 
 
-
-class AlarmDiffUtil(private val oldList: List<Alarm>, private val newList: List<Alarm>):DiffUtil.Callback() {
+class AlarmDiffUtil(private val oldList: List<Alarm>, private val newList: List<Alarm>) :
+    DiffUtil.Callback() {
     override fun getOldListSize(): Int {
         return oldList.size
     }

@@ -9,6 +9,7 @@ import android.content.Context
 import android.content.Intent
 import android.media.RingtoneManager
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import java.util.*
@@ -19,19 +20,44 @@ class AlarmService : BroadcastReceiver() {
         val message = intent?.getStringExtra(EXTRA_MESSAGE)
         val type = intent?.getIntExtra(EXTRA_TYPE, 0)
 
-        val title = when(type) {
+        val title = when (type) {
             TYPE_ONE_TIME -> "One Time Alarm"
             TYPE_REPEATING -> "Repeating Alarm"
             else -> "Something Wrong Here."
         }
 
         if (context != null && message != null) {
+            val requestCode = when (type) {
+                TYPE_ONE_TIME -> NOTIF_ID_ONE_TIME
+                TYPE_REPEATING -> NOTIF_ID_REPEATING
+                else -> -1
+            }
             showNotificationAlarm(
                 context,
                 title,
                 message,
-                101)
+                requestCode
+            )
         }
+    }
+
+    fun cencelAlarm(context: Context, type: Int) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmService::class.java)
+        val requestCode = when (type) {
+            TYPE_ONE_TIME -> NOTIF_ID_ONE_TIME
+            TYPE_REPEATING -> NOTIF_ID_REPEATING
+            else -> Log.d("CencelAlarm", "Unknown Type Of Alarm")
+        }
+        val pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, 0)
+        pendingIntent.cancel()
+        alarmManager.cancel(pendingIntent)
+        if (type == TYPE_ONE_TIME) {
+            Toast.makeText(context, "One Time Alarm Canceled", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, "Repeating Alarm Canceled", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
     //set Repeating Alarm
@@ -94,7 +120,8 @@ class AlarmService : BroadcastReceiver() {
 
         val channelId = "smart_alarm"
 
-        val notificationManage = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManage =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
 
         val builder = NotificationCompat.Builder(context, channelId)
@@ -105,7 +132,8 @@ class AlarmService : BroadcastReceiver() {
 
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
 
             channel.enableVibration(true)
             channel.vibrationPattern = longArrayOf(1000, 1000, 1000, 1000, 1000)

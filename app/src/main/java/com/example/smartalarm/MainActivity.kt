@@ -1,9 +1,9 @@
 package com.example.smartalarm
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -15,7 +15,6 @@ import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -27,9 +26,11 @@ class MainActivity : AppCompatActivity() {
     private var alarmDao: AlarmDao? = null
     private var alarmAdapter: AlarmAdapter? = null
 
+    private var alarmService: AlarmService? = null
+
     override fun onResume() {
         super.onResume()
-        alarmDao?.getAlarm()?.observe(this){
+        alarmDao?.getAlarm()?.observe(this) {
             alarmAdapter?.setData(it)
             Log.i("GetAlarm", "getAlarm : Alarm With $it")
         }
@@ -53,6 +54,8 @@ class MainActivity : AppCompatActivity() {
         alarmDao = db.alarmDao()
 
         alarmAdapter = AlarmAdapter()
+
+        alarmService = AlarmService()
 
         initView()
         setupRecyclerView()
@@ -83,7 +86,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     //Delete Function
-    private fun swipeToDelete(recyclerView: RecyclerView){
+    private fun swipeToDelete(recyclerView: RecyclerView) {
         ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
             0,
             ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
@@ -102,7 +105,8 @@ class MainActivity : AppCompatActivity() {
                     deletedAlarm?.let { alarmDao?.deleteAlarm(it) }
                     Log.i("DeleteAlarm", "onSwiped: deletAlarm $deletedAlarm")
                 }
-
+                val alarmType = deletedAlarm?.type
+                alarmType?.let { alarmService?.cencelAlarm(baseContext, it) }
             }
 
         }).attachToRecyclerView(recyclerView)

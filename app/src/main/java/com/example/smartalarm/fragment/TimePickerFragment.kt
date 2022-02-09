@@ -10,7 +10,7 @@ import java.util.*
 
 class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener {
 
-    private var dialogListener : TimeDialogListener? = null
+    private var dialogListener: TimeDialogListener? = null
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
@@ -34,6 +34,6 @@ class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener 
     }
 
     interface TimeDialogListener {
-        fun onDialogTimeSet(tag : String?, hourOfDay : Int, minute : Int)
+        fun onDialogTimeSet(tag: String?, hourOfDay: Int, minute: Int)
     }
 }

@@ -1,9 +1,9 @@
 package com.example.smartalarm
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.armand.smartalarm.helper.TAG_TIME_PICKER
 import com.example.smartalarm.data.Alarm
 import com.example.smartalarm.data.local.AlarmDB
@@ -52,20 +52,32 @@ class RepeatingAlarmActivity : AppCompatActivity(), TimePickerFragment.TimeDialo
                 val time = tvRepeatingTime.text.toString()
                 val message = etNoteRepeating.text.toString()
 
-                if (time != "Time"){
+                if (time != "Time") {
+                    alarmService.setRepeatingAlarm(
+                        applicationContext,
+                        AlarmService.TYPE_REPEATING,
+                        time,
+                        message
+                    )
                     CoroutineScope(Dispatchers.IO).launch {
                         alarmDao?.addAlarm(
                             Alarm(
                                 0,
                                 "Repeating Alarm",
                                 time,
-                                message
+                                message,
+                                AlarmService.TYPE_REPEATING
 
                             )
                         )
+                        finish()
                     }
-                }else{
-                    Toast.makeText(this@RepeatingAlarmActivity, "Please Set Time Of Alarm", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(
+                        this@RepeatingAlarmActivity,
+                        "Please Set Time Of Alarm",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
 
             }
@@ -80,7 +92,7 @@ class RepeatingAlarmActivity : AppCompatActivity(), TimePickerFragment.TimeDialo
     override fun onDialogTimeSet(tag: String?, hourOfDay: Int, minute: Int) {
         val calendar = Calendar.getInstance()
         calendar.set(hourOfDay, minute)
-        val dateFormat = SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
+        val dateFormat = SimpleDateFormat("hh:mm", Locale.getDefault())
 
         binding.tvRepeatingTime.text = dateFormat.format(calendar.time)
     }

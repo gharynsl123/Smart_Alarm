@@ -7,10 +7,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.smartalarm.data.Alarm
 import com.example.smartalarm.databinding.RowItemAlarmBinding
 
-class AlarmAdapter() :
+class AlarmAdapter :
     RecyclerView.Adapter<AlarmAdapter.MyViewHolder>() {
     var listAlarm: ArrayList<Alarm> = arrayListOf()
-    inner class MyViewHolder(val binding: RowItemAlarmBinding) : RecyclerView.ViewHolder(binding.root)
+
+    inner class MyViewHolder(val binding: RowItemAlarmBinding) :
+        RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = MyViewHolder(
         RowItemAlarmBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -27,11 +29,10 @@ class AlarmAdapter() :
 
     override fun getItemCount() = listAlarm.size
 
-    fun setData(list: List<Alarm>){
+    fun setData(list: List<Alarm>) {
         val alarmDiffUtil = AlarmDiffUtil(listAlarm, list)
-        val alarmDiffUtilResult= DiffUtil.calculateDiff(alarmDiffUtil)
+        val alarmDiffUtilResult = DiffUtil.calculateDiff(alarmDiffUtil)
         this.listAlarm = list as ArrayList<Alarm>
         alarmDiffUtilResult.dispatchUpdatesTo(this)
-        notifyDataSetChanged()
     }
 }

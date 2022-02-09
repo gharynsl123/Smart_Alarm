@@ -1,18 +1,18 @@
 package com.example.smartalarm
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import com.armand.smartalarm.helper.TAG_TIME_PICKER
 import com.armand.smartalarm.helper.timeFormatter
 import com.example.smartalarm.data.Alarm
 import com.example.smartalarm.data.local.AlarmDB
 import com.example.smartalarm.data.local.AlarmDao
-import com.example.smartalarm.fragment.TimePickerFragment
 import com.example.smartalarm.databinding.ActivityOneTimeAlarmBinding
 import com.example.smartalarm.fragment.DatePickerFragment
+import com.example.smartalarm.fragment.TimePickerFragment
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,7 +26,7 @@ class OneTimeAlarmActivity : AppCompatActivity(), DatePickerFragment.DateDialogL
     private val binding get() = _binding as ActivityOneTimeAlarmBinding
 
     private lateinit var alarmDao: AlarmDao
-    private var _alarmService : AlarmService? = null
+    private var _alarmService: AlarmService? = null
     private val alarmService get() = _alarmService as AlarmService
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,15 +61,16 @@ class OneTimeAlarmActivity : AppCompatActivity(), DatePickerFragment.DateDialogL
                 val time = tvOneTime.text.toString()
                 val message = tvNoteOneTime.text.toString()
 
-                if (date != "Date" && time != "Time"){
+                if (date != "Date" && time != "Time") {
                     alarmService.setOneTimeAlarm(applicationContext, 1, date, time, message)
                     CoroutineScope(Dispatchers.IO).launch {
-                        alarmDao.addAlarm(Alarm(0, date, time, message))
+                        alarmDao.addAlarm(Alarm(0, date, time, message, AlarmService.TYPE_ONE_TIME))
                     }
                     Log.i("AddAlarm", "Success set alarm on $date $time with massage $message")
                     finish()
-                }else {
-                    Toast.makeText(applicationContext, "Set Your Date & Time", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(applicationContext, "Set Your Date & Time", Toast.LENGTH_SHORT)
+                        .show()
                 }
 
             }
