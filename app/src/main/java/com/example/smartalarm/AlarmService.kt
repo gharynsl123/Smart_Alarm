@@ -15,6 +15,48 @@ import java.util.*
 
 //Creating Service For Notification
 class AlarmService : BroadcastReceiver() {
+    override fun onReceive(context: Context?, intent: Intent?) {
+        val message = intent?.getStringExtra(EXTRA_MESSAGE)
+        val type = intent?.getIntExtra(EXTRA_TYPE, 0)
+
+        val title = when(type) {
+            TYPE_ONE_TIME -> "One Time Alarm"
+            TYPE_REPEATING -> "Repeating Alarm"
+            else -> "Something Wrong Here."
+        }
+
+        if (context != null && message != null) {
+            showNotificationAlarm(
+                context,
+                title,
+                message,
+                101)
+        }
+    }
+
+    //set Repeating Alarm
+    fun setRepeatingAlarm(context: Context, type: Int, time: String, message: String) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmService::class.java)
+        intent.putExtra("message", message)
+        intent.putExtra("type", type)
+
+        val timeArray = time.split(":").toTypedArray()
+
+        val calendar = Calendar.getInstance()
+
+        //Time
+        calendar.set(Calendar.HOUR, Integer.parseInt(timeArray[0]))
+        calendar.set(Calendar.MINUTE, Integer.parseInt(timeArray[1]))
+        calendar.set(Calendar.SECOND, 0)
+
+        //Pending Intent
+        val pendingIntent = PendingIntent.getBroadcast(context, NOTIF_ID_REPEATING, intent, 0)
+        alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
+        Toast.makeText(context, "Success set RepeatingAlarm", Toast.LENGTH_SHORT).show()
+    }
+
+    //set One Time Alarm
     fun setOneTimeAlarm(context: Context, type: Int, date: String, time: String, message: String) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         //Put Data Intent
@@ -29,25 +71,16 @@ class AlarmService : BroadcastReceiver() {
         val calendar = Calendar.getInstance()
         //Date
         calendar.set(Calendar.YEAR, Integer.parseInt(dateArray[0]))
-        calendar.set(Calendar.MONTH, Integer.parseInt(dateArray[1])-1)
+        calendar.set(Calendar.MONTH, Integer.parseInt(dateArray[1]) - 1)
         calendar.set(Calendar.DAY_OF_MONTH, Integer.parseInt(dateArray[2]))
         //Time
         calendar.set(Calendar.HOUR, Integer.parseInt(timeArray[0]))
         calendar.set(Calendar.MINUTE, Integer.parseInt(timeArray[1]))
         calendar.set(Calendar.SECOND, 0)
         //Pending Intent
-        val pendingIntent = PendingIntent.getBroadcast(context, 101, intent, 0)
+        val pendingIntent = PendingIntent.getBroadcast(context, NOTIF_ID_ONE_TIME, intent, 0)
         alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
         Toast.makeText(context, "Success set OnetimeAlarm", Toast.LENGTH_SHORT).show()
-    }
-
-    override fun onReceive(context: Context?, intent: Intent?) {
-        val message = intent?.getStringExtra("message")
-        intent?.getIntExtra("type", 0)
-
-        if (context != null && message != null) {
-            showNotificationAlarm(context, "Oii", message, 101)
-        }
     }
 
     private fun showNotificationAlarm(
@@ -59,22 +92,38 @@ class AlarmService : BroadcastReceiver() {
         val channelName = "SmartAlarm"
         val ringtone = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
 
-        val notificationManage =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        val builder = NotificationCompat.Builder(context, "Alarm_1")
+        val channelId = "smart_alarm"
+
+        val notificationManage = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+
+        val builder = NotificationCompat.Builder(context, channelId)
             .setSmallIcon(R.drawable.ic_one_time)
             .setContentTitle(title)
             .setContentText(message)
             .setSound(ringtone)
 
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
-            val channel = NotificationChannel("alarm_1", channelName, NotificationManager.IMPORTANCE_DEFAULT)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT)
+            
             channel.enableVibration(true)
             channel.vibrationPattern = longArrayOf(1000, 1000, 1000, 1000, 1000)
+            builder.setChannelId(channelId)
             notificationManage.createNotificationChannel(channel)
         }
         val notif = builder.build()
         notificationManage.notify(notificationId, notif)
+    }
+
+    companion object {
+        const val EXTRA_MESSAGE = "message"
+        const val EXTRA_TYPE = "type"
+
+        const val NOTIF_ID_ONE_TIME = 101
+        const val NOTIF_ID_REPEATING = 102
+
+        const val TYPE_ONE_TIME = 1
+        const val TYPE_REPEATING = 0
     }
 }
